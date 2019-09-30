@@ -1,6 +1,6 @@
 import java.awt.event.KeyEvent;
 
-public class player extends rayCaster {
+public class Player extends RayCaster {
 
     private double walkSpd = .5;
     private double runSpd = 1;
@@ -8,33 +8,33 @@ public class player extends rayCaster {
     private double crouchingModifier = .5;
     private double defaultRenderHeight;
 
-    public player(){
+    public Player(){
         super();
         defaultRenderHeight = getRenderHeight();
     }
 
 
-    public void update(boolean[] keyCodes){
-        lineseg l = new lineseg();
+    public void updatePosition(boolean[] keyCodes) { // movement
+    	Lineseg l = new Lineseg();
         if (keyCodes[KeyEvent.VK_A]) {
-            l = new lineseg(getCenter(), getCentralAngle() + 90, -strafeSpd);
+            l = new Lineseg(getCenter(), getCentralAngle() + 90, -strafeSpd);
             setCenter(l.getEp());
         }
         if (keyCodes[KeyEvent.VK_D]) {
-            l = new lineseg(getCenter(), getCentralAngle() + 90, strafeSpd);
+            l = new Lineseg(getCenter(), getCentralAngle() + 90, strafeSpd);
             setCenter(l.getEp());
         }
         if (keyCodes[KeyEvent.VK_W]){
             if (keyCodes[KeyEvent.VK_CONTROL]) {
-                l = new lineseg(getCenter(), getCentralAngle(), runSpd);
+                l = new Lineseg(getCenter(), getCentralAngle(), runSpd);
             }
             else {
-                l = new lineseg(getCenter(), getCentralAngle(), walkSpd);
+                l = new Lineseg(getCenter(), getCentralAngle(), walkSpd);
             }
             setCenter(l.getEp());
         }
         if (keyCodes[KeyEvent.VK_S]){
-            l = new lineseg(getCenter(), getCentralAngle(), -walkSpd);
+            l = new Lineseg(getCenter(), getCentralAngle(), -walkSpd);
             setCenter(l.getEp());
         }
         if (keyCodes[KeyEvent.VK_SHIFT]) {
@@ -42,6 +42,12 @@ public class player extends rayCaster {
         }
         if (!keyCodes[KeyEvent.VK_SHIFT]){
             super.setRenderHeight(defaultRenderHeight);
+        }
+        if (keyCodes[KeyEvent.VK_RIGHT]){
+            //TODO turn player on key press
+        }
+        if (keyCodes[KeyEvent.VK_LEFT]){
+            //TODO turn player on key press
         }
 
     }

@@ -3,31 +3,31 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class rayCaster {
-    private List<lineseg> walls;
-    private ray[] rays;
-    private point center;
+public class RayCaster {
+    private List<Lineseg> walls;
+    private Ray[] rays;
+    private Point center;
 
     private double pov = 120;
     private int numRays = 800;
     private int range = 10000;
-    private boolean renderingRays = true;
-    private boolean renderingWalls = true;
+    private boolean renderingRays = false; // render 2D rays
+    private boolean renderingWalls = false; // render 2D walls
     private double xAngle = -90;
     private double yAngle = 0;
-    private point panelSize;
+    private Point panelSize; // size of renderPanel
     private double wallHeight = 4000;
     private double renderPlaneAdjacentDist = 1;
     private double renderHeight = 1200;
 
 
-    public rayCaster(){
-        walls = new ArrayList<lineseg>();
-        rays = new ray[numRays];
+    public RayCaster(){
+        walls = new ArrayList<Lineseg>();
+        rays = new Ray[numRays];
         for (int i = 0; i < numRays; i++) {
-            rays[i] = new ray(range, renderingRays);
+            rays[i] = new Ray(range, renderingRays);
         }
-        center = new point();
+        center = new Point();
     }
 
     public void castRays(Graphics g, BufferedImage img) {
@@ -45,19 +45,14 @@ public class rayCaster {
                 xAngle = xAngle + 360;
             rays[i].cast(center, xAngle + angleAdded, walls, g);
         }
-        if (renderingWalls) {
-            g.setColor(new Color(255,255,255,255));
-            for (lineseg l : walls) {
-                l.draw(g);
-            }
-        }
-        double temp = 1;
+
+        double temp = 1; // TODO rename
         for (int i = 0; i < numRays; i++){
             if (rays[i].getDistance() < range - 1) {
                 double fixedDistance = rays[i].getDistance() * Math.cos(Math.toRadians(rays[i].getAngle() - getCentralAngle()));
                 //double adjustedWallHeight = wallHeight * panelSize.getY()/2 / fixedDistance;
-                double distanceAboveCenter = new lineseg(new point(0,-wallHeight/2. + renderHeight), new point(renderPlaneAdjacentDist, wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
-                double distanceBelowCenter = new lineseg(new point(0,-wallHeight/2. + renderHeight), new point(renderPlaneAdjacentDist, -wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
+                double distanceAboveCenter = new Lineseg(new Point(0,-wallHeight/2. + renderHeight), new Point(renderPlaneAdjacentDist, wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
+                double distanceBelowCenter = new Lineseg(new Point(0,-wallHeight/2. + renderHeight), new Point(renderPlaneAdjacentDist, -wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
                 double yOffset = yAngle/90 * getPanelSize().getY();
 
                 g.setColor(new Color(
@@ -74,53 +69,58 @@ public class rayCaster {
 
                 if (temp > 64)
                     temp = 1;
-
+                // TODO set background for mini map
+                // TODO make slightly transparent
+                // TODO scale mini map
+                g.drawLine(i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
+                        i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter
+                        );
+                /*
                 g.drawImage(img, i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
                         i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter,
                         (int)temp,1,(int)(temp+fixedDistance/64) + 1,64, null);
+                */
+                
                 temp = temp + fixedDistance/64;
+                
+                if (renderingWalls) {
+                    g.setColor(new Color(255,255,255,255));
+                    for (Lineseg l : walls) {
+                        l.draw(g);
+                    }
+                }
 
                 //System.out.println(temp);
-
             }
         }
     }
-
-
-
-
-
-
-
-
-
 
     public double getCentralAngle(){
         return xAngle + numRays / 2. * pov / (double) (numRays - 1);
     }
 
 
-    public point getCenter() {
+    public Point getCenter() {
         return center;
     }
 
-    public void setCenter(point center) {
+    public void setCenter(Point center) {
         this.center = center;
     }
 
-    public List<lineseg> getWalls() {
+    public List<Lineseg> getWalls() {
         return walls;
     }
 
-    public void setWalls(List<lineseg> walls) {
+    public void setWalls(List<Lineseg> walls) {
         this.walls = walls;
     }
 
-    public ray[] getRays() {
+    public Ray[] getRays() {
         return rays;
     }
 
-    public void setRays(ray[] rays) {
+    public void setRays(Ray[] rays) {
         this.rays = rays;
     }
 
@@ -138,9 +138,9 @@ public class rayCaster {
 
     public void setNumRays(int numRays) {
         this.numRays = numRays;
-        rays = new ray[numRays];
+        rays = new Ray[numRays];
         for (int i = 0; i < numRays; i++) {
-            rays[i] = new ray(range, renderingRays);
+            rays[i] = new Ray(range, renderingRays);
         }
     }
 
@@ -182,11 +182,11 @@ public class rayCaster {
         this.xAngle = xAngle;
     }
 
-    public point getPanelSize() {
+    public Point getPanelSize() {
         return panelSize;
     }
 
-    public void setPanelSize(point panelSize) {
+    public void setPanelSize(Point panelSize) {
         this.panelSize = panelSize;
     }
 

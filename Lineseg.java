@@ -1,42 +1,46 @@
 import java.awt.*;
 
-public class lineseg {
-    private point sp, ep;
+public class Lineseg {
+    private Point sp, ep; // start and end point
 
-    public lineseg() {
-        sp = new point();
-        ep = new point();
+    public Lineseg() {
+        sp = new Point();
+        ep = new Point();
     }
-
-    public lineseg(point sp, point ep) {
+    
+    public Lineseg(Point sp, Point ep) {
         this.sp = sp;
         this.ep = ep;
     }
 
-    public lineseg(point p, double degreeAngle, double length){
+    public Lineseg(Point p, double degreeAngle, double length){
         sp = p;
         if (degreeAngle <= 90)
-            ep = new point(p.getX() + length * Math.cos(Math.toRadians(degreeAngle)), p.getY() + length * Math.sin(Math.toRadians(degreeAngle)));
+            ep = new Point(p.getX() + length * Math.cos(Math.toRadians(degreeAngle)), p.getY() + length * Math.sin(Math.toRadians(degreeAngle)));
         else{
             degreeAngle -= 180;
-            ep = new point(p.getX() + -1.0 * length * Math.cos(Math.toRadians(degreeAngle)), p.getY() + -1.0 * length * Math.sin(Math.toRadians(degreeAngle)));
+            ep = new Point(p.getX() + -1.0 * length * Math.cos(Math.toRadians(degreeAngle)), p.getY() + -1.0 * length * Math.sin(Math.toRadians(degreeAngle)));
         }
-
+    }
+    
+    public Lineseg(Lineseg line) {
+    	sp = line.getSp();
+    	ep = line.getEp();
     }
 
-    public point getSp() {
+    public Point getSp() {
         return sp;
     }
 
-    public void setSp(point sp) {
+    public void setSp(Point sp) {
         this.sp = sp;
     }
 
-    public point getEp() {
+    public Point getEp() {
         return ep;
     }
 
-    public void setEp(point ep) {
+    public void setEp(Point ep) {
         this.ep = ep;
     }
 
@@ -69,7 +73,8 @@ public class lineseg {
         return sp.getY() - getSlope() * sp.getX();
     }
 
-    public point getIntersection(lineseg l){
+    public Point getIntersection(Lineseg l){
+    	
         double x1 = sp.getX(); double x2 = ep.getX();
         double y1 = sp.getY(); double y2 = ep.getY();
         double x3 = l.getSp().getX(); double x4 = l.getEp().getX();
@@ -83,7 +88,7 @@ public class lineseg {
         final double u = -((((x1 - x2)*(y1 - y3)) - ((y1 - y2)*(x1 - x3))) / den);
 
         if (t >= 0 && t <= 1 && u >= 0 && u <= 1) { // IF they do intersect
-            point pt = new point();
+        	Point pt = new Point();
             pt.setX(x1 + t * (x2 - x1));
             pt.setY(y1 + t * (y2 - y1));
             return pt;
@@ -99,7 +104,4 @@ public class lineseg {
         else
             return Math.toDegrees(Math.atan((getEp().getY()-getSp().getY())/(getEp().getX()-getSp().getX())));
     }
-
-
-
 }

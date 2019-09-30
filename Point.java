@@ -1,15 +1,15 @@
 import java.awt.*;
 
-public class point {
+public class Point {
     private double x, y;
 
 
-    public point() {
+    public Point() {
         x = 0.;
         y = 0.;
     }
 
-    public point(double x, double y) {
+    public Point(double x, double y) {
         this.x = x;
         this.y = y;
     }
