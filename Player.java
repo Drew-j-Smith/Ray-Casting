@@ -44,10 +44,16 @@ public class Player extends RayCaster {
             super.setRenderHeight(defaultRenderHeight);
         }
         if (keyCodes[KeyEvent.VK_RIGHT]){
-            //TODO turn player on key press
+            super.setxAngle(super.getxAngle() + 1);
         }
         if (keyCodes[KeyEvent.VK_LEFT]){
-            //TODO turn player on key press
+        	super.setxAngle(super.getxAngle() - 1);
+        }
+        if (keyCodes[KeyEvent.VK_UP]){
+            super.setyAngle(super.getyAngle() + 1);
+        }
+        if (keyCodes[KeyEvent.VK_DOWN]){
+        	super.setyAngle(super.getyAngle() - 1);
         }
 
     }

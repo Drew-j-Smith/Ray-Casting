@@ -34,7 +34,7 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
         map += "#   #  # #";
         map += "# # # #  #";
         map += "##### ####";
-    	LevelEditor level = new LevelEditor(map, 10,10);
+    	LevelEditor level = new LevelEditor(map, 10, 10, 20);
     	try {
 			walls.addAll(level.mapToLineseg());
 		} catch (Exception e1) {

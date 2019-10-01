@@ -1,7 +1,7 @@
 import java.awt.*;
 
 public class Lineseg {
-    private Point sp, ep; // start and end point
+    protected Point sp, ep; // start and end point
 
     public Lineseg() {
         sp = new Point();

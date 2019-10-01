@@ -6,7 +6,8 @@ import java.util.List;
 public class RayCaster {
     private List<Lineseg> walls;
     private Ray[] rays;
-    private Point center;
+    private Point center; // position
+    private Wall testingWall;
 
     private double pov = 120;
     private int numRays = 800;
@@ -20,7 +21,6 @@ public class RayCaster {
     private double renderPlaneAdjacentDist = 1;
     private double renderHeight = 1200;
 
-
     public RayCaster(){
         walls = new ArrayList<Lineseg>();
         rays = new Ray[numRays];
@@ -31,6 +31,11 @@ public class RayCaster {
     }
 
     public void castRays(Graphics g, BufferedImage img) {
+    	testingWall = new Wall(img);
+    	testingWall.setImgMaxHeight(63);
+    	testingWall.setImgMaxWidth(63);
+    	testingWall.setImgMinHeight(0);	
+    	testingWall.setImgMinWidth(0);
         g.setColor(new Color(255,255,255,15));
         for (int i = 0; i < numRays; i++) {
             double angleAdded;
@@ -55,34 +60,38 @@ public class RayCaster {
                 double distanceBelowCenter = new Lineseg(new Point(0,-wallHeight/2. + renderHeight), new Point(renderPlaneAdjacentDist, -wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
                 double yOffset = yAngle/90 * getPanelSize().getY();
 
+                int shade = (int) (255. / (Math.pow(fixedDistance, .4) + 1));
                 g.setColor(new Color(
-                        (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
-                        (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
-                        (int) (255. / (Math.pow(fixedDistance, .4) + 1))));
+                		shade,
+                		shade,
+                		shade
+                        ));
 
 
                 //g.drawLine(i, (int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
                 //        i, (int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter);
                 //g.fillRect(i, (int)(getPanelSize().getY() - adjustedWallHeight)/2,
                 //                1, (int)adjustedWallHeight);
-
-
-                if (temp > 64)
-                    temp = 1;
-                // TODO set background for mini map
-                // TODO make slightly transparent
-                // TODO scale mini map
-                g.drawLine(i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
-                        i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter
-                        );
+                
                 /*
                 g.drawImage(img, i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
                         i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter,
                         (int)temp,1,(int)(temp+fixedDistance/64) + 1,64, null);
+                 //*/
+                if (temp > 64)
+                    temp = 1;
+                //testingWall.draw(i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter,g);
+                testingWall.draw(i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter,(int)(temp+fixedDistance/testingWall.getImgMaxWidth()),g);
+                /*
+                g.drawLine(i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
+                        i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter
+                        );
                 */
-                
                 temp = temp + fixedDistance/64;
                 
+                // TODO set background for mini map
+                // TODO make slightly transparent
+                // TODO scale mini map
                 if (renderingWalls) {
                     g.setColor(new Color(255,255,255,255));
                     for (Lineseg l : walls) {
