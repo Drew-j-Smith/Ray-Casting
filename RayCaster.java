@@ -88,20 +88,19 @@ public class RayCaster {
 
 
                         picturePosition = 1;
-                        Lineseg temp = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getSp());
-                        if (i != numRays - 1 && arrIntersections[i] == arrIntersections[i + 1]) {
-                            Lineseg temp3 = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getEp());
+                        Lineseg wallToSp = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getSp());
+                        if (i != numRays - 1 && arrIntersections[i] == arrIntersections[i + 1]) { //used to find if the sp or wp is on the left side of the screen
+                            Lineseg wallToEp = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getEp());
 
-                            Lineseg temp4 = new Lineseg(rays[i + 1].getEp(), walls.get(arrIntersections[i]).getSp());
-                            if (temp.getDistance() > temp4.getDistance())
-                                temp = temp3;
+                            Lineseg nextWallToSp = new Lineseg(rays[i + 1].getEp(), walls.get(arrIntersections[i]).getSp());
+                            if (wallToSp.getDistance() > nextWallToSp.getDistance())
+                                wallToSp = wallToEp;
                         }
-                        double temp2;
-                        temp2 = (temp.getDistance() * 5.) % 64.;
+                        double changeInPicPos = (wallToSp.getDistance() * 5.) % 64.;
                         g.drawImage(img, i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
                                 i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter,
-                                (int) picturePosition, 1, (int) (picturePosition + temp2) + 1, 64, null);
-                        picturePosition = picturePosition + temp2;
+                                (int) picturePosition, 1, (int) (picturePosition + changeInPicPos) + 1, 64, null);
+                        picturePosition = picturePosition + changeInPicPos;
                     }
 
                     if (renderingOutline) {

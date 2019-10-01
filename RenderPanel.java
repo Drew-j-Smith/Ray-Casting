@@ -21,12 +21,32 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
         caster = new Player();
         caster.setCenter(new Point(500,500));
         List<Lineseg> walls = caster.getWalls();
-        walls.add(new Lineseg(new Point(100,0), new Point(100,500)));
+
+        /*walls.add(new Lineseg(new Point(100,0), new Point(100,500)));
         walls.add(new Lineseg(new Point(0,100), new Point(500,100)));
         walls.add(new Lineseg(new Point(50, 500), new Point(500,50)));
         walls.add(new Lineseg(new Point(0, 0), new Point(0,600)));
         walls.add(new Lineseg(new Point(0, 0), new Point(800,0)));
-        walls.add(new Lineseg(new Point(800, 0), new Point(800,800)));
+        walls.add(new Lineseg(new Point(800, 0), new Point(800,800)));*/
+
+        String map = "";
+        map += "  ########";
+        map += "#        #";
+        map += "# ###### #";
+        map += "# #      #";
+        map += "# # #### #";
+        map += "# # #    #";
+        map += "###  # # #";
+        map += "#   #  # #";
+        map += "# # # #  #";
+        map += "##### ####";
+        LevelEditor level = new LevelEditor(map, 10,10);
+        try {
+            walls.addAll(level.mapToLineseg());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         caster.setNumRays(getWidth());
         caster.setPanelSize(new Point(getWidth(), getHeight()));
 

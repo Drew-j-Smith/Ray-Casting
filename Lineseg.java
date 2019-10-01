@@ -24,6 +24,11 @@ public class Lineseg {
 
     }
 
+    public Lineseg(Lineseg l){
+        this.sp = l.getSp();
+        this.ep = l.getEp();
+    }
+
     public Point getSp() {
         return sp;
     }
