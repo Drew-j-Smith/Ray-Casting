@@ -31,11 +31,11 @@ public class LevelEditor {
 		
 		/*	Bottom and top of walls are switched because the top left corner is (0,0)
 		 * 
-		 * 	         .-> bottom
-		 * 		     __
+		 *           .-> bottom
+		 *           __
 		 *	left <- |  | -> right
-		 *	        '--'    
-		 *		     '-> top
+		 *          '--'    
+		 *           '-> top
 		 *
 		 */
 		
@@ -194,7 +194,6 @@ public class LevelEditor {
 				
 			}
 		}
-		
 		return finalWalls;
 	}
 	

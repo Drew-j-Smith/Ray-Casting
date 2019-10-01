@@ -14,8 +14,8 @@ public class Player extends RayCaster {
     }
 
 
-    public void updatePosition(boolean[] keyCodes) { // movement
-    	Lineseg l = new Lineseg();
+    public void update(boolean[] keyCodes){
+        Lineseg l = new Lineseg();
         if (keyCodes[KeyEvent.VK_A]) {
             l = new Lineseg(getCenter(), getCentralAngle() + 90, -strafeSpd);
             setCenter(l.getEp());
@@ -57,9 +57,6 @@ public class Player extends RayCaster {
         }
 
     }
-
-
-
 
     public double getWalkSpd() {
         return walkSpd;

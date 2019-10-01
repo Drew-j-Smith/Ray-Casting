@@ -1,13 +1,14 @@
 import java.awt.*;
 
 public class Lineseg {
+
     protected Point sp, ep; // start and end point
 
     public Lineseg() {
         sp = new Point();
         ep = new Point();
     }
-    
+
     public Lineseg(Point sp, Point ep) {
         this.sp = sp;
         this.ep = ep;
@@ -21,11 +22,12 @@ public class Lineseg {
             degreeAngle -= 180;
             ep = new Point(p.getX() + -1.0 * length * Math.cos(Math.toRadians(degreeAngle)), p.getY() + -1.0 * length * Math.sin(Math.toRadians(degreeAngle)));
         }
+
     }
-    
-    public Lineseg(Lineseg line) {
-    	sp = line.getSp();
-    	ep = line.getEp();
+
+    public Lineseg(Lineseg l){
+        this.sp = l.getSp();
+        this.ep = l.getEp();
     }
 
     public Point getSp() {
@@ -74,7 +76,6 @@ public class Lineseg {
     }
 
     public Point getIntersection(Lineseg l){
-    	
         double x1 = sp.getX(); double x2 = ep.getX();
         double y1 = sp.getY(); double y2 = ep.getY();
         double x3 = l.getSp().getX(); double x4 = l.getEp().getX();
@@ -88,7 +89,7 @@ public class Lineseg {
         final double u = -((((x1 - x2)*(y1 - y3)) - ((y1 - y2)*(x1 - x3))) / den);
 
         if (t >= 0 && t <= 1 && u >= 0 && u <= 1) { // IF they do intersect
-        	Point pt = new Point();
+            Point pt = new Point();
             pt.setX(x1 + t * (x2 - x1));
             pt.setY(y1 + t * (y2 - y1));
             return pt;
@@ -104,4 +105,7 @@ public class Lineseg {
         else
             return Math.toDegrees(Math.atan((getEp().getY()-getSp().getY())/(getEp().getX()-getSp().getX())));
     }
+
+
+
 }

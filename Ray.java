@@ -1,7 +1,7 @@
 import java.awt.*;
 import java.util.List;
 
-public class Ray extends Lineseg {
+public class Ray extends Lineseg{
 
     private double range;
     private boolean render;
@@ -12,28 +12,27 @@ public class Ray extends Lineseg {
         this.render = render;
     }
 
-    public void cast(Point center, double angle, List<Lineseg> walls, Graphics g){
-    	Point intersectionPoint;
-
+    public int cast(Point center, double angle, List<Lineseg> walls, Graphics g){
+        Point intersectionPoint;
+        int intersectingWall = -1;
         //collision tests, returns EP of ray
         {
             setSp(center);
             setEp(new Lineseg(center, angle, range).getEp());
-            for (Lineseg l : walls) {
-                intersectionPoint = l.getIntersection(this);
+            for (int i = 0; i < walls.size(); i++) {
+                intersectionPoint = walls.get(i).getIntersection(this);
                 if (intersectionPoint != null && getDistance() > new Lineseg(getSp(), intersectionPoint).getDistance()) {
                     setEp(intersectionPoint);
+                    intersectingWall = i;
                 }
             }
         }
 
-        //rounds points
-        if (angle < 0){
-            //setEp(new point(getEp().getX(), Math.ceil(getEp().getY())));
-        }
 
         if (render)
             draw(g);
+
+        return intersectingWall;
     }
 
     public double getRange() {
