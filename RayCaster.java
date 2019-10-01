@@ -4,21 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RayCaster {
-    private List<Lineseg> walls;
-    private Ray[] rays;
-    private Point center;
-
-    private double pov = 120;
+    private double fov = 120;
     private int numRays = 800;
     private int range = 10000;
-    private boolean renderingRays = false; // render 2D rays
-    private boolean renderingWalls = false; // render 2D walls
+    private boolean renderingRays = false; //top down view
+    private boolean renderingWalls = false; //top down view
+    private boolean renderingTextures = true; //3d view
+    private boolean renderingLines = false; //3d view
+    private boolean renderingOutline = true; //outlines walls
     private double xAngle = -90;
     private double yAngle = 0;
-    private Point panelSize; // size of renderPanel
+    private Point panelSize;
     private double wallHeight = 4000;
     private double renderPlaneAdjacentDist = 1;
     private double renderHeight = 1200;
+
+    private List<Lineseg> walls;
+    private Ray[] rays;
+    int arrIntersections[] = new int[numRays];
+    private Point center;
 
 
     public RayCaster(){
@@ -31,72 +35,150 @@ public class RayCaster {
     }
 
     public void castRays(Graphics g, BufferedImage img) {
+
         g.setColor(new Color(255,255,255,15));
         for (int i = 0; i < numRays; i++) {
             double angleAdded;
-            //angleAdded = i * pov / (double) (numRays - 1);
-            double centralAngle = pov/2;
+            double centralAngle = fov /2;
             int distanceFromCenter = (int)(numRays / 2. - i);
-            double renderPlaneOppDist = distanceFromCenter * pov/45. * renderPlaneAdjacentDist / numRays;
+            double renderPlaneOppDist = distanceFromCenter * fov /45. * renderPlaneAdjacentDist / numRays;
             angleAdded = centralAngle - Math.toDegrees(Math.atan( renderPlaneOppDist / renderPlaneAdjacentDist));
             while (xAngle + angleAdded >= 270)
                 xAngle = xAngle - 360;
             while (xAngle + angleAdded <= -90)
                 xAngle = xAngle + 360;
-            rays[i].cast(center, xAngle + angleAdded, walls, g);
+            arrIntersections[i] = rays[i].cast(center, xAngle + angleAdded, walls, g);
+
         }
 
-        double temp = 1; // TODO rename
-        for (int i = 0; i < numRays; i++){
+        if (renderingWalls) {
+            g.setColor(new Color(255,255,255,255));
+            for (Lineseg l : walls) {
+                l.draw(g);
+            }
+        }
+
+        double picturePosition = 1;
+        double yOffset = yAngle/90 * getPanelSize().getY();
+        int beginningOfWall = -1;
+
+        for (int i = 0; i < numRays; i++) {
             if (rays[i].getDistance() < range - 1) {
-                double fixedDistance = rays[i].getDistance() * Math.cos(Math.toRadians(rays[i].getAngle() - getCentralAngle()));
-                //double adjustedWallHeight = wallHeight * panelSize.getY()/2 / fixedDistance;
-                double distanceAboveCenter = new Lineseg(new Point(0,-wallHeight/2. + renderHeight), new Point(renderPlaneAdjacentDist, wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
-                double distanceBelowCenter = new Lineseg(new Point(0,-wallHeight/2. + renderHeight), new Point(renderPlaneAdjacentDist, -wallHeight/2.)).getDistance() * renderPlaneAdjacentDist/fixedDistance;
-                double yOffset = yAngle/90 * getPanelSize().getY();
-
-                g.setColor(new Color(
-                        (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
-                        (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
-                        (int) (255. / (Math.pow(fixedDistance, .4) + 1))));
+                double fixedDistance = getFixedDistance(i);
+                double distanceAboveCenter = getDistanceAboveCenter(i);
+                double distanceBelowCenter = getDistanceBelowCenter(i);
 
 
-                //g.drawLine(i, (int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
-                //        i, (int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter);
-                //g.fillRect(i, (int)(getPanelSize().getY() - adjustedWallHeight)/2,
-                //                1, (int)adjustedWallHeight);
-
-
-                if (temp > 64)
-                    temp = 1;
-                // TODO set background for mini map
-                // TODO make slightly transparent
-                // TODO scale mini map
-                g.drawLine(i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
-                        i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter
-                        );
-                /*
-                g.drawImage(img, i,(int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter,
-                        i+1,(int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter,
-                        (int)temp,1,(int)(temp+fixedDistance/64) + 1,64, null);
-                */
-                
-                temp = temp + fixedDistance/64;
-                
-                if (renderingWalls) {
-                    g.setColor(new Color(255,255,255,255));
-                    for (Lineseg l : walls) {
-                        l.draw(g);
-                    }
+                if (renderingLines) {
+                    g.setColor(new Color(
+                            (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
+                            (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
+                            (int) (255. / (Math.pow(fixedDistance, .4) + 1))));
+                    g.drawLine(i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
+                            i, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter);
                 }
 
-                //System.out.println(temp);
+                while (picturePosition > 64)
+                    picturePosition = picturePosition - 64;
+
+
+
+                if (i == 0 || arrIntersections[i] != arrIntersections[i - 1]) {
+                    if (renderingTextures) {
+
+
+                        picturePosition = 1;
+                        Lineseg temp = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getSp());
+                        if (i != numRays - 1 && arrIntersections[i] == arrIntersections[i + 1]) {
+                            Lineseg temp3 = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getEp());
+
+                            Lineseg temp4 = new Lineseg(rays[i + 1].getEp(), walls.get(arrIntersections[i]).getSp());
+                            if (temp.getDistance() > temp4.getDistance())
+                                temp = temp3;
+                        }
+                        double temp2;
+                        temp2 = (temp.getDistance() * 5.) % 64.;
+                        g.drawImage(img, i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
+                                i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter,
+                                (int) picturePosition, 1, (int) (picturePosition + temp2) + 1, 64, null);
+                        picturePosition = picturePosition + temp2;
+                    }
+
+                    if (renderingOutline) {
+                        g.setColor(new Color(255, 0, 0));
+                        g.drawLine(i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
+                                i, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter);
+                        if (beginningOfWall != -1){
+                            renderOutline(i-1, beginningOfWall, g);
+                        }
+                        beginningOfWall = i;
+
+                    }
+                    //if(arrIntersections[i-1] != -1)
+                    //g.drawLine();
+                } else {
+                    if(renderingTextures) {
+
+                        Lineseg temp = new Lineseg(rays[i].getEp(), rays[i - 1].getEp());
+                        double temp2 = 64;
+                        temp2 = (temp.getDistance() * 5.) % 64;
+                        g.drawImage(img, i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
+                                i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter,
+                                (int) picturePosition, 1, (int) (picturePosition + temp2) + 1, 64, null);
+                        picturePosition = picturePosition + temp2;
+                    }
+                }
             }
+            else if (i != 0 && arrIntersections[i] != arrIntersections[i - 1] && renderingOutline && arrIntersections[i-1] != -1) {
+                renderOutline(i-1, beginningOfWall, g);
+                beginningOfWall = -1;
+            }
+        }
+        if (renderingOutline && numRays != 0 && arrIntersections[numRays - 1] != -1) {
+            renderOutline(numRays - 1, beginningOfWall, g);
         }
     }
 
+
+
+    private void renderOutline(int rayIndex, int beginningOfWall, Graphics g){
+        double yOffset = yAngle/90 * getPanelSize().getY();
+        g.setColor(new Color(255, 0, 0));
+        g.drawLine(rayIndex, (int) (getPanelSize().getY() + yOffset) / 2 - (int) getDistanceAboveCenter(rayIndex),
+                rayIndex, (int) (getPanelSize().getY() + yOffset) / 2 + (int) getDistanceBelowCenter(rayIndex));
+        g.setColor(new Color(0, 255, 0));
+        g.drawLine(beginningOfWall, (int) (getPanelSize().getY() + yOffset) / 2 - (int) getDistanceAboveCenter(beginningOfWall),
+                rayIndex, (int) (getPanelSize().getY() + yOffset) / 2 - (int) getDistanceAboveCenter(rayIndex));
+        g.setColor(new Color(0, 0, 255));
+        g.drawLine(beginningOfWall, (int) (getPanelSize().getY() + yOffset) / 2 + (int) getDistanceBelowCenter(beginningOfWall),
+                rayIndex, (int) (getPanelSize().getY() + yOffset) / 2 + (int) getDistanceBelowCenter(rayIndex));
+    }
+
+
+    private double getFixedDistance(int rayIndex){
+        return rays[rayIndex].getDistance() * Math.cos(Math.toRadians(rays[rayIndex].getAngle() - getCentralAngle()));
+    }
+
+    private double getDistanceAboveCenter(int rayIndex){
+        //2d perspective with y as height as x as distance
+        Point center = new Point(0,-wallHeight/2. + renderHeight);
+        Point renderPlane = new Point(renderPlaneAdjacentDist, wallHeight/2.);
+        return new Lineseg(center , renderPlane).getDistance() * renderPlaneAdjacentDist/getFixedDistance(rayIndex);
+    }
+
+    private double getDistanceBelowCenter(int rayIndex){
+        //2d perspective with y as height as x as distance
+        Point center = new Point(0,-wallHeight/2. + renderHeight);
+        Point renderPlane = new Point(renderPlaneAdjacentDist, -wallHeight/2.);
+        return new Lineseg(center, renderPlane).getDistance() * renderPlaneAdjacentDist/getFixedDistance(rayIndex);
+    }
+
+
+
+
+
     public double getCentralAngle(){
-        return xAngle + numRays / 2. * pov / (double) (numRays - 1);
+        return xAngle + numRays / 2. * fov / (double) (numRays - 1);
     }
 
 
@@ -124,12 +206,12 @@ public class RayCaster {
         this.rays = rays;
     }
 
-    public double getPov() {
-        return pov;
+    public double getFov() {
+        return fov;
     }
 
-    public void setPov(double pov) {
-        this.pov = pov;
+    public void setFov(double fov) {
+        this.fov = fov;
     }
 
     public int getNumRays() {
@@ -220,5 +302,37 @@ public class RayCaster {
 
     public void setRenderHeight(double renderHeight) {
         this.renderHeight = renderHeight;
+    }
+
+    public boolean isRenderingTextures() {
+        return renderingTextures;
+    }
+
+    public void setRenderingTextures(boolean renderingTextures) {
+        this.renderingTextures = renderingTextures;
+    }
+
+    public boolean isRenderingLines() {
+        return renderingLines;
+    }
+
+    public void setRenderingLines(boolean renderingLines) {
+        this.renderingLines = renderingLines;
+    }
+
+    public boolean isRenderingOutline() {
+        return renderingOutline;
+    }
+
+    public void setRenderingOutline(boolean renderingOutline) {
+        this.renderingOutline = renderingOutline;
+    }
+
+    public int[] getArrIntersections() {
+        return arrIntersections;
+    }
+
+    public void setArrIntersections(int[] arrIntersections) {
+        this.arrIntersections = arrIntersections;
     }
 }

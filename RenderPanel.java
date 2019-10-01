@@ -20,38 +20,13 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
         //caster = new rayCaster();
         caster = new Player();
         caster.setCenter(new Point(500,500));
-        caster.setRenderingWalls(true);
-        caster.setRenderingRays(false);
         List<Lineseg> walls = caster.getWalls();
-        String map = "";
-        map += "  ########";
-        map += "#        #";
-        map += "# ###### #";
-        map += "# #      #";
-        map += "# # #### #";
-        map += "# # #    #";
-        map += "###  # # #";
-        map += "#   #  # #";
-        map += "# # # #  #";
-        map += "##### ####";
-    	LevelEditor level = new LevelEditor(map, 10,10);
-    	try {
-			walls.addAll(level.mapToLineseg());
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-    
-    	System.out.println(walls.size());
-    	caster.setCenter(new Point(0,0));
-        /*
         walls.add(new Lineseg(new Point(100,0), new Point(100,500)));
         walls.add(new Lineseg(new Point(0,100), new Point(500,100)));
         walls.add(new Lineseg(new Point(50, 500), new Point(500,50)));
         walls.add(new Lineseg(new Point(0, 0), new Point(0,600)));
         walls.add(new Lineseg(new Point(0, 0), new Point(800,0)));
         walls.add(new Lineseg(new Point(800, 0), new Point(800,800)));
-        //*/
         caster.setNumRays(getWidth());
         caster.setPanelSize(new Point(getWidth(), getHeight()));
 
@@ -62,6 +37,7 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
 
 
         addComponentListener(new ComponentAdapter() {
+            @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
                 setPaused(paused);
@@ -76,9 +52,9 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
             public void run() {
                 while (true) {
 
-                    //double t = Timestamp.valueOf(LocalDateTime.now()).getTime();
+                    double t = Timestamp.valueOf(LocalDateTime.now()).getTime();
                     if (!paused)
-                        caster.updatePosition(keyCodes);
+                        caster.update(keyCodes);
                     if (keyCodes[KeyEvent.VK_ESCAPE])
                         System.exit(0);
 
@@ -89,6 +65,7 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    //System.out.println(1 / ((Timestamp.valueOf(LocalDateTime.now()).getTime() - t) / 1000.));
                     //System.out.println(Timestamp.valueOf(LocalDateTime.now()).getTime() - t);
                 }
             }
@@ -98,43 +75,58 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         caster.castRays(g, img);
-        caster.getCenter().draw(g);
     }
 
+
+    @Override
     public void mouseClicked(MouseEvent e) {
 
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
         //temp = new point(e.getX(),e.getY());
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         //List<lineseg> walls = caster.getWalls();
         //walls.add(new lineseg(temp, new point(e.getX(), e.getY())));
         //repaint();
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
 
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
 
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         mouseMoved(e);
 
     }
 
+    @Override
     public void mouseMoved(MouseEvent e){
         if (!paused) {
-            caster.setxAngle(caster.getxAngle() + (e.getX() - 100) / 10.);
-            caster.setyAngle(caster.getyAngle() + (e.getY() - 100) / -5.);
+            caster.setxAngle(caster.getxAngle() + (e.getX() - getWidth()/2) / 10.);
+            caster.setyAngle(caster.getyAngle() + (e.getY() - getHeight()/2) / -5.);
+            if (caster.getyAngle() > 90){
+                caster.setyAngle(90);
+            }
+            else if (caster.getyAngle() < -90){
+                caster.setyAngle(-90);
+            }
+
+
             try {
                 Robot robot = new Robot();
-                robot.mouseMove(100 + (int)getParent().getLocationOnScreen().getX(), 100 + (int)getParent().getLocationOnScreen().getY());
+                robot.mouseMove(getWidth()/2 + (int) getParent().getLocationOnScreen().getX(), getHeight()/2 + (int) getParent().getLocationOnScreen().getY());
             } catch (AWTException ex) {
                 ex.printStackTrace();
             }
@@ -142,18 +134,27 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
 
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {
 
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() < 1000) keyCodes[e.getKeyCode()] = true;
-        if (e.getKeyCode() == KeyEvent.VK_E) setPaused(!paused);
+        if (e.getKeyCode() < 1000)
+            keyCodes[e.getKeyCode()] = true;
+        if (e.getKeyCode() == KeyEvent.VK_E){
+            setPaused(!paused);
+        }
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() < 1000) keyCodes[e.getKeyCode()] = false;
+        if (e.getKeyCode() < 1000)
+            keyCodes[e.getKeyCode()] = false;
+
     }
+
 
     public Player getCaster() {
         return caster;
@@ -188,7 +189,7 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
 
             try {
                 Robot robot = new Robot();
-                robot.mouseMove(100 + (int) getParent().getLocationOnScreen().getX(), 100 + (int) getParent().getLocationOnScreen().getY());
+                robot.mouseMove(getWidth()/2 + (int) getParent().getLocationOnScreen().getX(), getHeight()/2 + (int) getParent().getLocationOnScreen().getY());
             } catch (AWTException ex) {
                 ex.printStackTrace();
             }

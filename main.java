@@ -9,7 +9,7 @@ public class main {
     public static void main(String[] args) {
 
         JFrame theGUI = new JFrame();
-        RenderPanel panel = new RenderPanel(Color.black);
+        RenderPanel panel = new RenderPanel(Color.BLACK);
         theGUI.add(panel);
 
         BufferedImage img = null;
@@ -23,6 +23,7 @@ public class main {
         theGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         theGUI.setSize(800,600);
         theGUI.setVisible(true);
+
 
     }
 }
