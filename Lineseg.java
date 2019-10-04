@@ -1,7 +1,7 @@
 import java.awt.*;
 
 public class Lineseg {
-    private Point sp, ep;
+    protected Point sp, ep;
 
     public Lineseg() {
         sp = new Point();
@@ -75,6 +75,7 @@ public class Lineseg {
     }
 
     public Point getIntersection(Lineseg l){
+    	
         double x1 = sp.getX(); double x2 = ep.getX();
         double y1 = sp.getY(); double y2 = ep.getY();
         double x3 = l.getSp().getX(); double x4 = l.getEp().getX();

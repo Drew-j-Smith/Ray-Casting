@@ -20,7 +20,7 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
         //caster = new rayCaster();
         caster = new Player();
         caster.setCenter(new Point(500,500));
-        List<Lineseg> walls = caster.getWalls();
+        List<Wall> walls = caster.getWalls();
 
         /*walls.add(new Lineseg(new Point(100,0), new Point(100,500)));
         walls.add(new Lineseg(new Point(0,100), new Point(500,100)));
@@ -30,23 +30,42 @@ public class RenderPanel extends JPanel implements MouseMotionListener, MouseLis
         walls.add(new Lineseg(new Point(800, 0), new Point(800,800)));*/
 
         String map = "";
-        map += "  ########";
-        map += "#        #";
-        map += "# ###### #";
-        map += "# #      #";
-        map += "# # #### #";
-        map += "# # #    #";
-        map += "###  # # #";
-        map += "#   #  # #";
-        map += "# # # #  #";
-        map += "##### ####";
-        LevelEditor level = new LevelEditor(map, 10,10);
+        String mapTexture = "";
+
+        map += "O #######";
+        map += "        #";
+        map += "# #o##  #";
+        map += "#       #";
+        map += "# # # # #";
+        map += "#       #";
+        map += "#  ## # #";
+        map += "#       #";
+        map += "#########";
+        
+        mapTexture += "b #######";
+        mapTexture += "        #";
+        mapTexture += "# # ##  #";
+        mapTexture += "#       #";
+        mapTexture += "# # # # #";
+        mapTexture += "#       #";
+        mapTexture += "#  ## # #";
+        mapTexture += "#       #";
+        mapTexture += "#########";
+
+        LevelEditor level = new LevelEditor(map, mapTexture, 9,9, 12.6);
         try {
             walls.addAll(level.mapToLineseg());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+       
+        System.out.println("Wall size: " + walls.size());
+        caster.setRenderingRays(false);
+        caster.setRenderingOutline(false);
+        caster.setRenderingTextures(true);
+        caster.setRenderingWalls(true);
+        caster.setRenderingLines(false);
+        caster.setCenter(new Point(-5,-5));
         caster.setNumRays(getWidth());
         caster.setPanelSize(new Point(getWidth(), getHeight()));
 

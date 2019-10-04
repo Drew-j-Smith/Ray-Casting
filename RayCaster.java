@@ -6,11 +6,11 @@ import java.util.List;
 public class RayCaster {
     private double fov = 120;
     private int numRays = 800;
-    private int range = 10000;
+    private int range = 400;
     private boolean renderingRays = false; //top down view
-    private boolean renderingWalls = false; //top down view
+    private boolean renderingWalls = false; //top down view TODO change name
     private boolean renderingTextures = true; //3d view
-    private boolean renderingLines = false; //3d view
+    private boolean renderingLines = false; //3d view TODO change name
     private boolean renderingOutline = true; //outlines walls
     private double xAngle = -90;
     private double yAngle = 0;
@@ -19,23 +19,23 @@ public class RayCaster {
     private double renderPlaneAdjacentDist = 1;
     private double renderHeight = 1200;
 
-    private List<Lineseg> walls;
+    private List<Wall> walls;
     private Ray[] rays;
     int arrIntersections[] = new int[numRays];
     private Point center;
 
 
     public RayCaster(){
-        walls = new ArrayList<Lineseg>();
+        walls = new ArrayList<Wall>();
         rays = new Ray[numRays];
         for (int i = 0; i < numRays; i++) {
-            rays[i] = new Ray(range, renderingRays);
+            rays[i] = new Ray(range, false); // TODO
         }
         center = new Point();
     }
 
     public void castRays(Graphics g, BufferedImage img) {
-
+    	int arrIntersections[] = new int[numRays];
         g.setColor(new Color(255,255,255,15));
         for (int i = 0; i < numRays; i++) {
             double angleAdded;
@@ -51,55 +51,45 @@ public class RayCaster {
 
         }
 
-        if (renderingWalls) {
-            g.setColor(new Color(255,255,255,255));
-            for (Lineseg l : walls) {
-                l.draw(g);
-            }
-        }
-
         double picturePosition = 1;
         double yOffset = yAngle/90 * getPanelSize().getY();
         int beginningOfWall = -1;
 
         for (int i = 0; i < numRays; i++) {
             if (rays[i].getDistance() < range - 1) {
+            	Wall currentWall = walls.get(arrIntersections[i]);
                 double fixedDistance = getFixedDistance(i);
-                double distanceAboveCenter = getDistanceAboveCenter(i);
+                double distanceAboveCenter = getDistanceAboveCenter(i,(int)currentWall.getHeight());
                 double distanceBelowCenter = getDistanceBelowCenter(i);
 
-
                 if (renderingLines) {
+                	int shade = (int) (255. / (Math.pow(fixedDistance, .4) + 1));
                     g.setColor(new Color(
-                            (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
-                            (int) (255. / (Math.pow(fixedDistance, .4) + 1)),
-                            (int) (255. / (Math.pow(fixedDistance, .4) + 1))));
+                            shade,
+                            shade,
+                            shade));
                     g.drawLine(i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
                             i, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter);
                 }
-
-                while (picturePosition > 64)
-                    picturePosition = picturePosition - 64;
-
-
+                
+                while (picturePosition > currentWall.getTextureWidth())
+                    picturePosition = picturePosition - currentWall.getTextureWidth();
 
                 if (i == 0 || arrIntersections[i] != arrIntersections[i - 1]) {
                     if (renderingTextures) {
-
-
                         picturePosition = 1;
-                        Lineseg wallToSp = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getSp());
+                        Lineseg wallToSp = new Lineseg(rays[i].getEp(), currentWall.getSp());
                         if (i != numRays - 1 && arrIntersections[i] == arrIntersections[i + 1]) { //used to find if the sp or wp is on the left side of the screen
-                            Lineseg wallToEp = new Lineseg(rays[i].getEp(), walls.get(arrIntersections[i]).getEp());
+                            Lineseg wallToEp = new Lineseg(rays[i].getEp(), currentWall.getEp());
 
-                            Lineseg nextWallToSp = new Lineseg(rays[i + 1].getEp(), walls.get(arrIntersections[i]).getSp());
+                            Lineseg nextWallToSp = new Lineseg(rays[i + 1].getEp(), currentWall.getSp());
                             if (wallToSp.getDistance() > nextWallToSp.getDistance())
                                 wallToSp = wallToEp;
                         }
-                        double changeInPicPos = (wallToSp.getDistance() * 5.) % 64.;
-                        g.drawImage(img, i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
-                                i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter,
-                                (int) picturePosition, 1, (int) (picturePosition + changeInPicPos) + 1, 64, null);
+                        double changeInPicPos = (wallToSp.getDistance() * 5.) % currentWall.getTextureWidth();
+                        currentWall.draw(i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
+                        		i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter, 
+                        		(int) picturePosition, (int) (picturePosition + changeInPicPos), g);
                         picturePosition = picturePosition + changeInPicPos;
                     }
 
@@ -119,11 +109,18 @@ public class RayCaster {
                     if(renderingTextures) {
 
                         Lineseg temp = new Lineseg(rays[i].getEp(), rays[i - 1].getEp());
-                        double temp2 = 64;
-                        temp2 = (temp.getDistance() * 5.) % 64;
+                        double temp2 = currentWall.getTextureWidth();
+                        temp2 = (temp.getDistance() * 5.) % currentWall.getTextureWidth();
+                        ///*
+                        currentWall.draw(i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
+                                i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter,
+                                (int) picturePosition, (int) (picturePosition + temp2) + 1, g);
+                       	//*/
+                        /*
                         g.drawImage(img, i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
                                 i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter,
                                 (int) picturePosition, 1, (int) (picturePosition + temp2) + 1, 64, null);
+                        //*/
                         picturePosition = picturePosition + temp2;
                     }
                 }
@@ -132,10 +129,30 @@ public class RayCaster {
                 renderOutline(i-1, beginningOfWall, g);
                 beginningOfWall = -1;
             }
+            
+            
+            if (renderingRays) {
+            	g.setColor(new Color(255,255,255,10));
+            	rays[i].draw(g);
+            }
+            
+            if (true) {
+            	g.setColor(new Color(255,255,255));
+            	center.draw(g);
+            }
+            
+            if (renderingWalls) {
+            	// TODO add semi transparent background
+                g.setColor(new Color(255,255,255));
+                for (Lineseg l : walls) {
+                    l.draw(g);
+                }
+            }
         }
         if (renderingOutline && numRays != 0 && arrIntersections[numRays - 1] != -1) {
             renderOutline(numRays - 1, beginningOfWall, g);
         }
+        
     }
 
 
@@ -164,6 +181,13 @@ public class RayCaster {
         Point renderPlane = new Point(renderPlaneAdjacentDist, wallHeight/2.);
         return new Lineseg(center , renderPlane).getDistance() * renderPlaneAdjacentDist/getFixedDistance(rayIndex);
     }
+    
+    private double getDistanceAboveCenter(int rayIndex, int wallHeight){
+        //2d perspective with y as height as x as distance
+        Point center = new Point(0,-wallHeight * 200/2. + renderHeight);
+        Point renderPlane = new Point(renderPlaneAdjacentDist, wallHeight * 200/2.);
+        return new Lineseg(center , renderPlane).getDistance() * renderPlaneAdjacentDist/getFixedDistance(rayIndex);
+    }
 
     private double getDistanceBelowCenter(int rayIndex){
         //2d perspective with y as height as x as distance
@@ -172,14 +196,9 @@ public class RayCaster {
         return new Lineseg(center, renderPlane).getDistance() * renderPlaneAdjacentDist/getFixedDistance(rayIndex);
     }
 
-
-
-
-
     public double getCentralAngle(){
         return xAngle + numRays / 2. * fov / (double) (numRays - 1);
     }
-
 
     public Point getCenter() {
         return center;
@@ -189,11 +208,11 @@ public class RayCaster {
         this.center = center;
     }
 
-    public List<Lineseg> getWalls() {
+    public List<Wall> getWalls() {
         return walls;
     }
 
-    public void setWalls(List<Lineseg> walls) {
+    public void setWalls(List<Wall> walls) {
         this.walls = walls;
     }
 
@@ -221,7 +240,7 @@ public class RayCaster {
         this.numRays = numRays;
         rays = new Ray[numRays];
         for (int i = 0; i < numRays; i++) {
-            rays[i] = new Ray(range, renderingRays);
+            rays[i] = new Ray(range, false);
         }
     }
 
@@ -243,7 +262,7 @@ public class RayCaster {
     public void setRenderingRays(boolean renderingRays) {
         this.renderingRays = renderingRays;
         for (int i = 0; i < numRays; i++) {
-            rays[i].setRender(renderingRays);
+            //rays[i].setRender(renderingRays);
         }
     }
 

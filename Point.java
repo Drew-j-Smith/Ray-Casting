@@ -41,5 +41,12 @@ public class Point {
     public void draw(Graphics g) {
         g.drawOval((int) x-5, (int) y-5, 10,10);
     }
+    
+    public Point sub(Point pt) {
+    	return new Point(x - pt.getX(), y - pt.getY());
+    }
+    public Point add(Point pt) {
+    	return new Point(x + pt.getX(), y + pt.getY());
+    }
 
 }

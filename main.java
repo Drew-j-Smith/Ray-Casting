@@ -5,9 +5,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class main {
+public class Main {
     public static void main(String[] args) {
-
         JFrame theGUI = new JFrame();
         RenderPanel panel = new RenderPanel(Color.BLACK);
         theGUI.add(panel);

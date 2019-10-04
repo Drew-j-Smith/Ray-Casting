@@ -7,10 +7,10 @@ public class Wall extends Lineseg {
 	protected BufferedImage texture = null;
 	// TODO have darker texture for distances further away
 	protected double height = 20;
-	protected int imgMinHeight = 0; // TODO rename to something like constraintX1,constraintX2
-	protected int imgMaxHeight = 0;
-	protected int imgMinWidth = 0;
-	protected int imgMaxWidth = 0;
+	protected int constraintY1 = 0; // image point upper left y
+	protected int constraintY2 = 0; // image point bottom right y
+	protected int constraintX1 = 0; // image point upper left x
+	protected int constraintX2 = 0; // image point bottom right x
 	
 	public Wall() {
 		super();
@@ -19,8 +19,23 @@ public class Wall extends Lineseg {
 	public Wall(BufferedImage img) {
 		super();
 		this.texture = img;
-		imgMaxHeight = img.getHeight();
-		imgMaxWidth = img.getWidth();
+		constraintY2 = img.getHeight();
+		constraintX2 = img.getWidth();
+	}
+	
+	public Wall(Lineseg lineseg) {
+		super(lineseg);
+	}
+	
+	public Wall(Wall wall) {
+		super(wall.getSp(), wall.getEp());
+		this.texture = wall.getTexture();
+		this.constraintX1 = wall.getConstraintX1();
+		this.constraintX2 = wall.getConstraintX2();
+		this.constraintY1 = wall.getConstraintY1();
+		this.constraintY2 = wall.getConstraintY2();
+		this.height = wall.getHeight();
+		this.raysPass = wall.isRaysPass();
 	}
 	
 	public Wall(Point sp, Point ep) {
@@ -42,8 +57,8 @@ public class Wall extends Lineseg {
 	public Wall(BufferedImage img, Point sp, Point ep, double height, boolean raysPass) {
 		super(ep,sp);
 		this.texture = img;
-		imgMaxHeight = img.getHeight();
-		imgMaxWidth = img.getWidth();
+		constraintY2 = img.getHeight();
+		constraintX2 = img.getWidth();
 		this.height = height;
 		this.raysPass = raysPass;
 	}
@@ -51,8 +66,8 @@ public class Wall extends Lineseg {
 	public Wall(BufferedImage img, Point sp, double degreeAngle, double length, double height, boolean raysPass) {
 		super(sp, degreeAngle,length);
 		this.texture = img;
-		imgMaxHeight = img.getHeight();
-		imgMaxWidth = img.getWidth();
+		constraintY2 = img.getHeight();
+		constraintX2 = img.getWidth();
 		this.raysPass = raysPass;
 		this.height = height;
 	}
@@ -65,16 +80,25 @@ public class Wall extends Lineseg {
 		
 	}
 	
-	public void draw(int dx, int dy1, int dy2, int sx, Graphics g) {
+	public void draw(int dx1, int dy1, int dx2, int dy2, int sx1, int sx2, Graphics g) {
 		// y1 = (int)(getPanelSize().getY() + yOffset)/2 - (int)distanceAboveCenter
 		// y2 = (int)(getPanelSize().getY() + yOffset)/2 + (int)distanceBelowCenter
-		if (sx > imgMaxWidth) sx = imgMinWidth;
 		if (texture != null) {
-	    	g.drawImage(texture, dx,dy1,
-                 dx+1,dy2,
-                 sx,imgMinHeight,sx+1,imgMaxHeight, null
+	    	g.drawImage(texture,
+	    		 dx1,dy1,
+                 dx2,dy2,
+                 constraintX1 + sx1, constraintY1,
+                 constraintX1 + sx2, constraintY2,
+                 null
             );
 		}
+	}
+	
+	public void setConstraints(int x1, int y1, int x2, int y2) {
+		this.constraintX1 = x1;
+		this.constraintX2 = x2;
+		this.constraintY1 = y1;
+		this.constraintY2 = y2;
 	}
 
 	public boolean isRaysPass() {
@@ -101,37 +125,39 @@ public class Wall extends Lineseg {
 		this.height = height;
 	}
 
-	public int getImgMinHeight() {
-		return imgMinHeight;
+	public int getConstraintY1() {
+		return constraintY1;
 	}
 
-	public void setImgMinHeight(int imgMinHeight) {
-		this.imgMinHeight = imgMinHeight;
+	public void setConstraintY1(int constraintY1) {
+		this.constraintY1 = constraintY1;
 	}
 
-	public int getImgMaxHeight() {
-		return imgMaxHeight;
+	public int getConstraintY2() {
+		return constraintY2;
 	}
 
-	public void setImgMaxHeight(int imgMaxHeight) {
-		this.imgMaxHeight = imgMaxHeight;
+	public void setConstraintY2(int constraintY2) {
+		this.constraintY2 = constraintY2;
 	}
 
-	public int getImgMinWidth() {
-		return imgMinWidth;
+	public int getConstraintX1() {
+		return constraintX1;
 	}
 
-	public void setImgMinWidth(int imgMinWidth) {
-		this.imgMinWidth = imgMinWidth;
+	public void setConstraintX1(int constraintX1) {
+		this.constraintX1 = constraintX1;
 	}
 
-	public int getImgMaxWidth() {
-		return imgMaxWidth;
+	public int getConstraintX2() {
+		return constraintX2;
 	}
 
-	public void setImgMaxWidth(int imgMaxWidth) {
-		this.imgMaxWidth = imgMaxWidth;
+	public void setConstraintX2(int constraintX2) {
+		this.constraintX2 = constraintX2;
 	}
-
 	
+	public int getTextureWidth() {
+		return constraintX2 - constraintX1;	
+	}
 }

@@ -43,11 +43,19 @@ public class Player extends RayCaster {
         if (!keyCodes[KeyEvent.VK_SHIFT]){
             super.setRenderHeight(defaultRenderHeight);
         }
-
+        if (keyCodes[KeyEvent.VK_RIGHT]){
+            super.setxAngle(super.getxAngle() + 1);
+        }
+        if (keyCodes[KeyEvent.VK_LEFT]){
+        	super.setxAngle(super.getxAngle() - 1);
+        }
+        if (keyCodes[KeyEvent.VK_UP]){
+            super.setyAngle(super.getyAngle() + 1);
+        }
+        if (keyCodes[KeyEvent.VK_DOWN]){
+        	super.setyAngle(super.getyAngle() - 1);
+        }
     }
-
-
-
 
     public double getWalkSpd() {
         return walkSpd;
