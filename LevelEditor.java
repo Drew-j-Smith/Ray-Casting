@@ -14,7 +14,8 @@ public class LevelEditor {
 
 	private double wallLength = 20;
 	
-	private final char wall = '#', wood = 'w', hitler = 'h', blue = 'b';
+	private final char wall = '#', largePillar = 'O', smallPillar = 'o';
+	private final char stoneWall = 's', woodWall = 'w', blueWall = 'b', hitlerPainting = 'h';
 	BufferedImage img;
 	
 	boolean top, bottom, left, right;
@@ -43,102 +44,77 @@ public class LevelEditor {
 		
 		List<Wall> finalWalls = new ArrayList<Wall>();
 		
-		topLine = new Wall(img, null, null, 20, true);
+		topLine = new Wall(img, new Point(), new Point(), 20, true);
 		bottomLine = new Wall(img, null, null, 20, true);
-		boolean renderTop = true, renderBottom = false;
 		/*
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				
 				final int i = x + (y * width);
 				
-					// horizontal walls ------------------------------------------------------------------
-				renderTop = true;
-				renderBottom = true;
-					if (y != 0 && map.charAt(i-width) == wall) renderTop = false;
-					if (y != height - 1 && map.charAt(i+width-1) == wall) renderBottom = false;
-					
-					if (x == 0) { // start a new wall at left edge
-						if (map.charAt(x) == wall) {
-							setConstraints(mapTexture.charAt(i));
-							topLine.setSp(new Point(x*wallLength,y*wallLength));
-							bottomLine.setSp(new Point(x*wallLength,y*wallLength + wallLength));
+				// horizontal walls ------------------------------------------------------------------
+				
+				boolean wallOnLeft = false;
+				boolean sameLeftTexture = false;
+				boolean wallAbove = false;
+				boolean wallAboveLeft = false;
+				
+				if (y != 0) {
+					if (map.charAt(i - width) == wall) wallAbove = true;
+					if (x != 0) {
+						if (map.charAt(i - width - 1) == wall) wallAboveLeft = true;
+					}
+				}
+				if (x != 0) {
+					if (map.charAt(i-1) == wall) wallOnLeft = true;
+					if (mapTexture.charAt(i-1) == mapTexture.charAt(i)) sameLeftTexture = true;
+				}
+				// ##-##
+				// #-- #
+				if (map.charAt(i) == wall) {
+					if (wallAbove) {
+						if (wallOnLeft && !wallAboveLeft) {
+							System.out.println("End Wall");
+							// end wall
+							topLine.setEp(new Point(x * wallLength, y * wallLength));
+							finalWalls.add(topLine);
 						}
-					} else if (x != 0) {
-						if (x != width - 1) {
-							if (map.charAt(i) == wall) {
-								if (map.charAt(i - 1) == wall) {
-									if (mapTexture.charAt(i - 1) == mapTexture.charAt(i)) { // extend wall
-										setConstraints(mapTexture.charAt(i));
-										topLine.setEp(new Point((x+1)*wallLength,y*wallLength));
-										bottomLine.setEp(new Point((x+1)*wallLength,y*wallLength + wallLength));
-									} else if (mapTexture.charAt(i - 1) != mapTexture.charAt(i)) { // end wall, submit, and start new wall
-										setConstraints(mapTexture.charAt(i - 1));
-										topLine.setEp(new Point(x*wallLength,y*wallLength));
-										bottomLine.setEp(new Point(x*wallLength,y*wallLength + wallLength));
-										if (renderTop) finalWalls.add(new Wall(topLine));
-										if (renderBottom) finalWalls.add(new Wall(bottomLine));
-										setConstraints(mapTexture.charAt(i));
-										topLine.setSp(new Point(x*wallLength,y*wallLength));
-										bottomLine.setSp(new Point(x*wallLength,y*wallLength + wallLength));
-									}
-								} else if (map.charAt(i - 1) != wall) { // start new wall
-									setConstraints(mapTexture.charAt(i));
-									topLine.setSp(new Point(x*wallLength,y*wallLength));
-									bottomLine.setSp(new Point(x*wallLength,y*wallLength + wallLength));
-								}
-							} else if (map.charAt(i) != wall) {
-								if (map.charAt(i - 1) == wall) { // end wall, submit
-									setConstraints(mapTexture.charAt(i - 1));
-									topLine.setEp(new Point(x*wallLength,y*wallLength));
-									bottomLine.setEp(new Point(x*wallLength,y*wallLength + wallLength));
-									if (renderTop) finalWalls.add(new Wall(topLine));
-									if (renderBottom) finalWalls.add(new Wall(bottomLine));
-								} 
-							}
-						} else if (x == width - 1) {
-							if (map.charAt(i) == wall) {
-								if (map.charAt(i - 1) == wall) {
-									if (mapTexture.charAt(i - 1) == mapTexture.charAt(i)) { // extend wall
-										setConstraints(mapTexture.charAt(i));
-										topLine.setEp(new Point((x+1)*wallLength,y*wallLength));
-										bottomLine.setEp(new Point((x+1)*wallLength,y*wallLength + wallLength));
-										if (renderTop) finalWalls.add(new Wall(topLine));
-										if (renderBottom) finalWalls.add(new Wall(bottomLine));
-									} else if (mapTexture.charAt(i - 1) != mapTexture.charAt(i)) { // end wall, submit, and start new wall and end wall
-										setConstraints(mapTexture.charAt(i - 1));
-										topLine.setEp(new Point(x*wallLength,y*wallLength));
-										bottomLine.setEp(new Point(x*wallLength,y*wallLength + wallLength));
-										if (renderTop) finalWalls.add(new Wall(topLine));
-										if (renderBottom) finalWalls.add(new Wall(bottomLine));
-										setConstraints(mapTexture.charAt(i));
-										topLine.setSp(new Point(x*wallLength,y*wallLength));
-										topLine.setEp(new Point((x+1)*wallLength,y*wallLength));
-										bottomLine.setSp(new Point(x*wallLength,y*wallLength + wallLength));
-										bottomLine.setEp(new Point((x+1)*wallLength,y*wallLength + wallLength));
-										if (renderTop) finalWalls.add(new Wall(topLine));
-										if (renderBottom) finalWalls.add(new Wall(bottomLine));
-									}
-								} else if (map.charAt(i - 1) != wall) { // start wall and end wall submit
-									setConstraints(mapTexture.charAt(i));
-									topLine.setSp(new Point(x*wallLength,y*wallLength));
-									topLine.setEp(new Point((x+1)*wallLength,y*wallLength));
-									bottomLine.setSp(new Point(x*wallLength,y*wallLength + wallLength));
-									bottomLine.setEp(new Point((x+1)*wallLength,y*wallLength + wallLength));
-									if (renderTop) finalWalls.add(new Wall(topLine));
-									if (renderBottom) finalWalls.add(new Wall(bottomLine));
-								}
-							} else if (map.charAt(i) != wall) {
-								if (map.charAt(i - 1) == wall) { // end wall and submit to final
-									setConstraints(mapTexture.charAt(i - 1));
-									topLine.setEp(new Point((x)*wallLength,y*wallLength));
-									bottomLine.setEp(new Point(x*wallLength,y*wallLength + wallLength));
-									if (renderTop) finalWalls.add(new Wall(topLine));
-									if (renderBottom) finalWalls.add(new Wall(bottomLine));
-								}
-							}
+					} else {
+						if (wallOnLeft && !wallAboveLeft && sameLeftTexture) {
+							System.out.println("Expand Wall");
+							// expand
+							topLine.setEp(new Point(x * wallLength, y * wallLength));
+						} else if (!wallOnLeft || wallAboveLeft) {
+							System.out.println("Start new Wall");
+							// start new wall
+							setConstraints(topLine, mapTexture.charAt(i));
+							topLine.setSp(new Point(x * wallLength, y * wallLength));
+						} else if (wallOnLeft && !wallAboveLeft && !sameLeftTexture) {
+							System.out.println("End Wall, start new one");
+							// end lastWall start new wall
+							topLine.setEp(new Point(x * wallLength, y * wallLength));
+							finalWalls.add(new Wall(topLine));
+							setConstraints(topLine, mapTexture.charAt(i));
+							topLine.setSp(new Point(x * wallLength, y * wallLength));
 						}
 					}
+					if (x == width - 1) {
+						if (!wallAbove) {
+							System.out.println(" + End Wall");
+							// end wall
+							topLine.setEp(new Point(x * wallLength + wallLength, y * wallLength));
+							finalWalls.add(new Wall(topLine));
+						}
+					}
+				
+				} else {
+					if (wallOnLeft && !wallAboveLeft) {
+						System.out.println("End Wall");
+						// end wall
+						topLine.setEp(new Point(x * wallLength, y * wallLength));
+						finalWalls.add(new Wall(topLine));
+					}
+				}
 			}
 		}
 		//*/
@@ -148,16 +124,6 @@ public class LevelEditor {
 		
 		verticalLeftWalls = new ArrayList<Wall>();
 		verticalRightWalls = new ArrayList<Wall>();
-		
-		 //*	Bottom and top of walls are switched because the top left corner is (0,0)
-		 //* 
-		 //* 	         .-> bottom
-		 //* 		     __
-		 //*	left <- |  | -> right
-		 //*	        '--'    
-		 //*		     '-> top
-		 //*
-		 //*
 		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -186,21 +152,21 @@ public class LevelEditor {
 					left = true;
 					// Check if right and left walls are to be drawn
 					if (y == 0) { // bottom is true because it's in the top row
-						if (map.charAt(i + width) != ' ') top = false;
+						if (map.charAt(i + width) == wall) top = false;
 					} else if (y == height - 1) {
-						if (map.charAt(i - width) != ' ') bottom = false;
+						if (map.charAt(i - width) == wall) bottom = false;
 					} else {
-						if (map.charAt(i + width) != ' ') top = false;
-						if (map.charAt(i - width) != ' ') bottom = false;
+						if (map.charAt(i + width) == wall) top = false;
+						if (map.charAt(i - width) == wall) bottom = false;
 					}
 					// Check if top and bottom walls are to be drawn
 					if (x == 0) {
-						if (map.charAt(i+1) != ' ') right = false;
+						if (map.charAt(i+1) == wall) right = false;
 					} else if (x == width - 1) {
-						if (map.charAt(i - 1) != ' ') left = false;
+						if (map.charAt(i - 1) == wall) left = false;
 					} else {
-						if (map.charAt(i - 1) == '#') left = false;
-						if (map.charAt(i + 1) == '#') right = false;
+						if (map.charAt(i - 1) == wall) left = false;
+						if (map.charAt(i + 1) == wall) right = false;
 					}
 					
 					this.setConstraints(mapTexture.charAt(i), x);
@@ -394,15 +360,27 @@ public class LevelEditor {
 						verticalRightWalls.get(x).setEp(null);
 					}
 				}
-				if (map.charAt(i) == 'O') {
+				if (map.charAt(i) == largePillar) {
 					CircleWall temp = new CircleWall(img,new Point(x*wallLength + (wallLength/2), y*wallLength+ (wallLength/2)), 6.2);
 					setConstraints(temp, mapTexture.charAt(i));
 					finalWalls.add(temp);
 				}
-				if (map.charAt(i) == 'o') {
+				if (map.charAt(i) == smallPillar) {
 					CircleWall temp = new CircleWall(img,new Point(x*wallLength + (wallLength/2), y*wallLength+ (wallLength/2)), 3.1);
 					setConstraints(temp, mapTexture.charAt(i));
-					temp.setHeight(10);
+					temp.setHeight(20);
+					finalWalls.add(temp);
+				}
+				if (map.charAt(i) == '/') {
+					Wall temp = new Wall(img, new Point(x*wallLength,y*wallLength + wallLength), new Point(x*wallLength+wallLength,y*wallLength), 20, true);
+					setConstraints(temp, mapTexture.charAt(i));
+					temp.setHeight(20);
+					finalWalls.add(temp);
+				}
+				if (map.charAt(i) == '\\') {
+					Wall temp = new Wall(img, new Point(x*wallLength,y*wallLength), new Point(x*wallLength+wallLength,y*wallLength + wallLength), 20, true);
+					setConstraints(temp, mapTexture.charAt(i));
+					temp.setHeight(20);
 					finalWalls.add(temp);
 				}
 				
@@ -410,30 +388,26 @@ public class LevelEditor {
 		}
 		//*/
 
-
 		return finalWalls;
 	}
 	
-	private void setConstraints(char prevTile, int x) {
+	private void setConstraints(char tile, int x) {
 		int x1=0,y1=0,x2=0,y2=0;
-		switch (prevTile) {
-		case wall:
+		switch (tile) {
+		case stoneWall:
 			x1 = 0; y1 = 0; x2 = 64; y2 = 64; 
 			break;
-		case wood:
+		case woodWall:
 			x1 = 256; y1 = 192; x2 = 320; y2 = 256; 
 			break;
-		case hitler:
+		case hitlerPainting:
 			x1 = 0; y1 = 64; x2 = 64; y2 = 128; 
 			break;
-		case blue:
+		case blueWall:
 			x1 = 128; y1 = 128; x2 = 192; y2 = 192; 
 			break;
 		default:
-			topLine.setConstraints(0, 0, 64, 64);
-			bottomLine.setConstraints(0, 0, 64, 64);
-			verticalLeftWalls.get(x).setConstraints(0, 0, 64, 64);
-			verticalRightWalls.get(x).setConstraints(0, 0, 64, 64);
+			x1 = 0; y1 = 0; x2 = 64; y2 = 64; 
 			break;
 		}
 		topLine.setConstraints(x1, y1, x2, y2);
@@ -442,42 +416,19 @@ public class LevelEditor {
 		verticalRightWalls.get(x).setConstraints(x1, y1, x2, y2);
 	}
 	
-	private void setConstraints(char prevTile) {
-		int x1=0,y1=0,x2=0,y2=0;
-		switch (prevTile) {
-		case wall:
-			x1 = 0; y1 = 0; x2 = 64; y2 = 64; 
-			break;
-		case wood:
-			x1 = 256; y1 = 192; x2 = 320; y2 = 256; 
-			break;
-		case hitler:
-			x1 = 0; y1 = 64; x2 = 64; y2 = 128; 
-			break;
-		case blue:
-			x1 = 128; y1 = 128; x2 = 192; y2 = 192; 
-			break;
-		default:
-			x1 = 0; y1 = 0; x2 = 64; y2 = 64; 
-			break;
-		}
-		topLine.setConstraints(x1, y1, x2, y2);
-		bottomLine.setConstraints(x1, y1, x2, y2);
-	}
-	
 	private void setConstraints(Wall wall, char tile) {
 		int x1=0,y1=0,x2=0,y2=0;
 		switch (tile) {
-		case '#':
+		case stoneWall:
 			x1 = 0; y1 = 0; x2 = 64; y2 = 64; 
 			break;
-		case 'w':
+		case woodWall:
 			x1 = 256; y1 = 192; x2 = 320; y2 = 256; 
 			break;
-		case 'h':
+		case hitlerPainting:
 			x1 = 0; y1 = 64; x2 = 64; y2 = 128; 
 			break;
-		case 'b':
+		case blueWall:
 			x1 = 128; y1 = 128; x2 = 192; y2 = 192; 
 			break;
 		default:
