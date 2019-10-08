@@ -86,17 +86,15 @@ public class SocketTest extends Thread {
                 //System.out.println(client.getReceivedMessage());
                 //System.out.println(client.getPingTime());
                 //System.out.println(client.isConnected());
-                if (client.getReceivedMessage() == null){}
-                else {
-                    Point p;
-                    try {
-                        p = new Point(client.getReceivedMessage());
-                        player.setCenter(p);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        System.out.println(client.getReceivedMessage());
-                    }
+                Point p;
+                try {
+                    p = new Point(client.getReceivedMessage());
+                    player.setCenter(p);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println(client.getReceivedMessage());
                 }
+                
             }
 
         }
