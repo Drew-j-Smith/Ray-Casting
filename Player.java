@@ -11,6 +11,9 @@ public class Player extends RayCaster {
     public Player(){
         super();
         defaultRenderHeight = getRenderHeight();
+        
+        SocketTest test = new SocketTest(this);
+        test.start();
     }
 
 
