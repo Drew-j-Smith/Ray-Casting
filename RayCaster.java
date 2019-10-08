@@ -89,7 +89,7 @@ public class RayCaster {
                         double changeInPicPos = (wallToSp.getDistance() * 5.) % currentWall.getTextureWidth();
                         currentWall.draw(i, (int) (getPanelSize().getY() + yOffset) / 2 - (int) distanceAboveCenter,
                         		i + 1, (int) (getPanelSize().getY() + yOffset) / 2 + (int) distanceBelowCenter, 
-                        		(int) picturePosition, (int) (picturePosition + changeInPicPos), g);
+                        		(int) picturePosition, (int) (picturePosition + changeInPicPos) + 1, g);
                         picturePosition = picturePosition + changeInPicPos;
                     }
 
