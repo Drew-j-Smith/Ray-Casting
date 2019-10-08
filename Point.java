@@ -13,6 +13,15 @@ public class Point {
         this.x = x;
         this.y = y;
     }
+    
+    public Point(String point){
+        int temp = point.indexOf(',');
+        int temp2 = point.indexOf('}');
+
+        this.x = Double.parseDouble(point.substring(8,temp));
+        this.y = Double.parseDouble(point.substring(temp + 4, temp2));
+
+    }
 
     public double getX() {
         return x;
