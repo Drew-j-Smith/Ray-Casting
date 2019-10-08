@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -11,9 +12,8 @@ public class SocketTest extends Thread {
 
     public void run() {
         String ans;
-        Scanner reader = new Scanner(System.in);
-        ans = reader.nextLine();
-
+        //Scanner reader = new Scanner(System.in);
+        ans = JOptionPane.showInputDialog("Server or Client? (s/c)");
 
 
         if (ans.equals("s")) {
@@ -43,15 +43,19 @@ public class SocketTest extends Thread {
         }
         else {
             Client client = new Client();
+            System.out.println("Enter Ip");
+            String ip = JOptionPane.showInputDialog("Enter IP Address");
+            if (ip.equals("localhost"))
+                ip = "127.0.0.1";
 
-
+            String finalIp = ip;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (true) {
                         try {
                             //client.startClient("127.0.0.1", 5000, "Username");
-                            client.startClient("10.24.81.68", 5000, "Username");
+                            client.startClient(finalIp, 5000, "Username");
 
                             break;
                         } catch (IOException e) {
@@ -86,6 +90,7 @@ public class SocketTest extends Thread {
                 //System.out.println(client.getReceivedMessage());
                 //System.out.println(client.getPingTime());
                 //System.out.println(client.isConnected());
+
                 Point p;
                 try {
                     p = new Point(client.getReceivedMessage());
@@ -94,7 +99,6 @@ public class SocketTest extends Thread {
                     e.printStackTrace();
                     System.out.println(client.getReceivedMessage());
                 }
-                
             }
 
         }
